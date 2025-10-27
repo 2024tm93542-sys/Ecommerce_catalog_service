@@ -1,0 +1,11 @@
+CREATE DATABASE IF NOT EXISTS catalog_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE catalog_db;
+
+CREATE TABLE IF NOT EXISTS catalogue (
+  product_id INT PRIMARY KEY AUTO_INCREMENT,
+  sku VARCHAR(64) NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  category VARCHAR(100),
+  price DECIMAL(10,2),
+  is_active BOOLEAN DEFAULT TRUE
+);
