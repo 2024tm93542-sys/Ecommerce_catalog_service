@@ -79,25 +79,74 @@ def create_product(product):
     conn.close()
     return product_id
 
-def update_product(sku, product_data):
+def update_product(product_id, product_data):
     conn = get_connection()
-    cursor = conn.cursor()
+    # Use dictionary cursor so fetched rows are dicts (not tuples)
+    cursor = conn.cursor(dictionary=True)
     fields = []
     values = []
     for k, v in product_data.items():
         fields.append(f"{k}=%s")
         values.append(v)
-    values.append(sku)
-    query = f"UPDATE catalogue SET {', '.join(fields)} WHERE sku=%s"
+    values.append(product_id)
+    query = f"UPDATE catalogue SET {', '.join(fields)} WHERE product_id=%s"
     cursor.execute(query, tuple(values))
     conn.commit()
+
+    # Get the product post-update
+    cursor.execute("SELECT * FROM catalogue WHERE product_id=%s", (product_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        return 0
+
+    # Normalize types for JSON/Pydantic
+    try:
+        if row.get('price') is not None:
+            row['price'] = float(row['price'])
+    except Exception:
+        pass
+
+    # Ensure is_active is a bool
+    try:
+        row['is_active'] = bool(row.get('is_active'))
+    except Exception:
+        pass
+
     conn.close()
-    return cursor.rowcount
+    return row
 
 def soft_delete_product(product_id):
+    """Soft-delete a product by product_id and return the product dict.
+
+    Returns:
+        dict: the product row (with `is_active` set to False) on success
+        0: if no product was found to delete
+    """
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
+
+    # Get the product first
+    cursor.execute("SELECT * FROM catalogue WHERE product_id=%s", (product_id,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return 0
+
+    # Perform soft delete
     cursor.execute("UPDATE catalogue SET is_active=FALSE WHERE product_id=%s", (product_id,))
     conn.commit()
+
+    # Normalize types for JSON/Pydantic
+    try:
+        # price might be Decimal
+        if 'price' in row and row['price'] is not None:
+            row['price'] = float(row['price'])
+    except Exception:
+        pass
+    # is_active stored as 1/0 or True/False; set to False because we soft-deleted
+    row['is_active'] = False
+
     conn.close()
-    return cursor.rowcount
+    return row

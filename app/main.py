@@ -20,22 +20,26 @@ def list_products(
 @app.post("/v1/products", response_model=schemas.ProductOut, status_code=201)
 def create_product(product: schemas.ProductCreate):
     product_id = crud.create_product(product)
-    prod = crud.fetch_product_by_sku(product.sku)
+    # fetch_products returns (rows, total) - pick the first row (the created product)
+    rows, total = crud.fetch_products(1, 1, None, None, None, None, product.name)
+    if not rows:
+        raise HTTPException(status_code=500, detail="Failed to fetch created product")
+    prod = rows[0]
     return prod
 
-@app.put("/v1/products/{sku}", response_model=schemas.ProductOut)
-def update_product(sku: str, payload: schemas.ProductUpdate):
+@app.put("/v1/products/{product_id}", response_model=schemas.ProductOut)
+def update_product(product_id: str, payload: schemas.ProductUpdate):
     updates = {k: v for k, v in payload.dict().items() if v is not None}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
-    updated = crud.update_product(sku, updates)
+    updated = crud.update_product(product_id, updates)
     if not updated:
         raise HTTPException(status_code=404, detail="Product not found")
-    return crud.fetch_product_by_sku(sku)
+    return updated
 
-@app.delete("/v1/products/{sku}", response_model=schemas.ProductOut)
-def delete_product(sku: str):
-    deleted = crud.soft_delete_product(sku)
+@app.delete("/v1/products/{product_id}", response_model=schemas.ProductOut)
+def delete_product(product_id: str):
+    deleted = crud.soft_delete_product(product_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Product not found")
-    return crud.fetch_product_by_sku(sku)
+    return deleted
