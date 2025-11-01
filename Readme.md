@@ -98,6 +98,40 @@ API documentation will be available at:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
+## Running with Docker Compose
+
+This project supports running the API, MySQL database, and data loader using Docker Compose. This is the recommended way to get started for local development or testing.
+
+### Quick Start
+
+1. Build and start all services (API, MySQL, and data loader):
+
+```bash
+docker-compose up --build
+```
+
+- The MySQL database will be initialized with the schema from `ddl.sql`.
+- The data loader service will automatically import products from `eci_products.csv` into the database using `csv_loader.py`.
+- The FastAPI server will be available at [http://localhost:8000](http://localhost:8000)
+
+2. To stop and remove all containers, networks, and volumes:
+
+```bash
+docker-compose down -v
+```
+
+### How Data Loading Works
+- The data loader service waits for the MySQL database to be healthy, then runs:
+  ```bash
+  python csv_loader.py --host db --user root --password <your_password> --db ecommerce --csv /app/data/eci_products.csv
+  ```
+- There is no need for a separate shell script; the loader runs directly as a service.
+- If you want to reload data, you can remove the database volume and restart the services.
+
+### Customizing Database Credentials
+- By default, the MySQL root password is set via the `MYSQL_PASSWORD` environment variable (see `docker-compose.yml`).
+- You can override this by creating a `.env` file or setting environment variables before running Docker Compose.
+
 ## Virtual Environment Management
 
 ### Activating the Environment
