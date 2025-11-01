@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS catalog_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE catalog_db;
+CREATE DATABASE IF NOT EXISTS ecommerce CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE ecommerce;
 
 CREATE TABLE IF NOT EXISTS catalogue (
   product_id INT PRIMARY KEY AUTO_INCREMENT,
