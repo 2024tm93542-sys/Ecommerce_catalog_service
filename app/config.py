@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     MYSQL_USER: str = "root"
     MYSQL_PASSWORD: str
     MYSQL_DB: str = "ecommerce"
+    MYSQL_PORT: Optional[int] = 3306
 
     class Config:
         env_file = ".env"

@@ -7,6 +7,7 @@ connection_pool = pooling.MySQLConnectionPool(
     pool_size=5,
     pool_reset_session=True,
     host=settings.MYSQL_HOST,
+    port=settings.MYSQL_PORT,
     database=settings.MYSQL_DB,
     user=settings.MYSQL_USER,
     password=settings.MYSQL_PASSWORD
