@@ -102,6 +102,10 @@ API documentation will be available at:
 
 This project supports running the API, MySQL database, and data loader using Docker Compose. This is the recommended way to get started for local development or testing.
 
+### Ports
+Mysql Server -- 3307
+Catalog API service -- 8000
+
 ### Quick Start
 
 1. Build and start all services (API, MySQL, and data loader):
